@@ -1,16 +1,5 @@
 "use strict";
 
-var scriptTagTailwind = document.createElement("script");
-scriptTagTailwind.src = "https://cdn.tailwindcss.com";
-document.head.appendChild(scriptTagTailwind);
-var linkTag = document.createElement("link");
-linkTag.rel = "stylesheet";
-linkTag.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css";
-linkTag.integrity = "sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==";
-linkTag.crossOrigin = "anonymous";
-linkTag.referrerPolicy = "no-referrer";
-document.head.appendChild(linkTag);
-
 var createDataTable = function createDataTable(tableId, tableHeadingId) {
   var plugins = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {
     searching: false
@@ -269,3 +258,5 @@ var createDataTable = function createDataTable(tableId, tableHeadingId) {
     initializeDataTable: initializeDataTable
   };
 };
+
+module.exports = createDataTable;
