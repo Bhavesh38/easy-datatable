@@ -1,18 +1,18 @@
+// import { upIcon, downIcon } from "./assest/icons";
 
 const createDataTable = (
     tableId,
-    tableHeadingId,
-    plugins = { searching: false }
+    plugins = null
 ) => {
-    let originalTableBody = null;
+    let originalTableBody = [];
+    let initialTableHeadData = [];
     let dataTableID = null;
-    let table1_heading = null;
+    let dataTableHeading = null;
     let increasing = true;
 
     const filterAndSortTableBody = (tableBody, columnIndex, searchText) => {
-        const rows = Array.from(originalTableBody.rows).map((row) =>
-            row.cloneNode(true)
-        );
+        const rows = [];
+        originalTableBody.forEach((row) => rows.push(row.cloneNode(true)));
         const filteredRows = rows.filter((row) => {
             for (let i = 0; i < row.cells.length; i++) {
                 const cellContent = row.cells[i].textContent.trim().toLowerCase();
@@ -23,35 +23,48 @@ const createDataTable = (
             return false;
         });
 
-        if (columnIndex !== -1) {
-            filteredRows.sort((a, b) => {
-                let cellA = a.cells[columnIndex].textContent.trim();
-                let cellB = b.cells[columnIndex].textContent.trim();
-                if (a.cells[columnIndex].hasAttribute("data-order")) {
-                    cellA = a.cells[columnIndex].getAttribute("data-order").trim();
-                }
+        // if (columnIndex !== -1) {
+        //     filteredRows.sort((a, b) => {
+        //         let cellA = a.cells[columnIndex].textContent.trim();
+        //         let cellB = b.cells[columnIndex].textContent.trim();
+        //         if (a.cells[columnIndex].hasAttribute("data-order")) {
+        //             cellA = a.cells[columnIndex].getAttribute("data-order").trim();
+        //         }
 
-                if (b.cells[columnIndex].hasAttribute("data-order")) {
-                    cellB = b.cells[columnIndex].getAttribute("data-order").trim();
-                }
-                const valueA = parseFloat(cellA);
-                const valueB = parseFloat(cellB);
+        //         if (b.cells[columnIndex].hasAttribute("data-order")) {
+        //             cellB = b.cells[columnIndex].getAttribute("data-order").trim();
+        //         }
+        //         const valueA = parseFloat(cellA);
+        //         const valueB = parseFloat(cellB);
 
-                if (!isNaN(valueA) && !isNaN(valueB)) {
-                    return valueA - valueB;
-                } else {
-                    return cellA.localeCompare(cellB);
-                }
-            });
-        }
+        //         if (!isNaN(valueA) && !isNaN(valueB)) {
+        //             return valueA - valueB;
+        //         } else {
+        //             return cellA.localeCompare(cellB);
+        //         }
+        //     });
+        // }
 
-        while (tableBody.firstChild) {
-            tableBody.removeChild(tableBody.firstChild);
-        }
-        filteredRows.forEach((row) => {
-            tableBody.appendChild(row);
-        });
+        deleteAllRows();
+        rowsInTable(filteredRows);
+
     };
+
+    const deleteAllRows = () => {
+        const curr_table = document.getElementById(dataTableID);
+        const number_of_rows = curr_table.rows.length;
+        for (let i = number_of_rows - 1; i > 0; i--) {
+            curr_table.deleteRow(i);
+        }
+    }
+
+    const rowsInTable = (rowsToAdd) => {
+        const curr_table = document.getElementById(dataTableID);
+        const table_body = curr_table.querySelectorAll('tbody')[0];
+        rowsToAdd.forEach((row) => {
+            table_body.appendChild(row);
+        });
+    }
 
     function parseCellValue(cellValue) {
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -64,8 +77,22 @@ const createDataTable = (
             return parseFloat(cellValue);
         }
     }
-    const sortTableBodyDecreasing = (tableBody, columnIndex) => {
-        const rows = Array.from(tableBody.rows);
+
+    const getCurrentRows = () => {
+        const temp_rows = [];
+        const tbodyRows = document.getElementById(dataTableID).querySelectorAll("tr");
+        tbodyRows.forEach((row, index) => {
+            if (index === 0) {
+                return;
+            }
+            temp_rows.push(row.cloneNode(true));
+        });
+        return temp_rows;
+    }
+    const sortTableBodyDecreasing = (columnIndex) => {
+        const rows = [];
+        const current_rows = getCurrentRows();
+        current_rows.forEach((row) => rows.push(row.cloneNode(true)));
 
         rows.sort((a, b) => {
             let cellA = a.cells[columnIndex].textContent.trim();
@@ -77,9 +104,6 @@ const createDataTable = (
             if (b.cells[columnIndex].hasAttribute("data-order")) {
                 cellB = b.cells[columnIndex].getAttribute("data-order").trim();
             }
-
-            // If the values are numeric, sort in descending order
-            // If the values are non-numeric, sort lexicographically
             const valueA = parseCellValue(cellA);
             const valueB = parseCellValue(cellB);
 
@@ -92,20 +116,14 @@ const createDataTable = (
             }
         });
 
-        // Remove existing rows from the table
-        while (tableBody.firstChild) {
-            tableBody.removeChild(tableBody.firstChild);
-        }
-
-        // Append the sorted rows back to the table
-        rows.forEach((row) => {
-            tableBody.appendChild(row);
-        });
+        deleteAllRows();
+        rowsInTable(rows);
     };
 
-    const sortTableBodyIncreasing = (tableBody, columnIndex) => {
-        const rows = Array.from(tableBody.rows);
-
+    const sortTableBodyIncreasing = (columnIndex) => {
+        const rows = [];
+        const current_rows = getCurrentRows();
+        current_rows.forEach((row) => rows.push(row.cloneNode(true)));
         rows.sort((a, b) => {
             let cellA = a.cells[columnIndex].textContent.trim();
             let cellB = b.cells[columnIndex].textContent.trim();
@@ -128,81 +146,199 @@ const createDataTable = (
                 return cellA.localeCompare(cellB);
             }
         });
-        while (tableBody.firstChild) {
-            tableBody.removeChild(tableBody.firstChild);
-        }
-
-        rows.forEach((row) => {
-            tableBody.appendChild(row);
-        });
+        const curr_table = document.getElementById(dataTableID);
+        deleteAllRows();
+        rowsInTable(rows);
     };
 
     const changeIncreasingBtnColor = (cellIndex) => {
-        if (table1_heading) {
-            const cells = table1_heading.querySelectorAll("th");
-
+        if (dataTableID) {
+            let cells = dataTableHeading.querySelectorAll("th");
+            if (cells.length === 0) {
+                cells = dataTableHeading.querySelectorAll("td");
+            }
             cells.forEach((cell, index) => {
-                const icons = cell.querySelectorAll("i");
-                icons[0].classList.remove("text-gray-200");
-                icons[1].classList.remove("text-gray-200");
+                const icons = cell.querySelectorAll("span");
+                icons[0].style.display = "none";
+                icons[1].style.display = "none";
                 if (index === cellIndex) {
-                    icons[1].classList.add("text-gray-200");
+                    icons[0].style.display = "contents";
                 }
             });
         }
     };
     const changeDecreasingBtnColor = (cellIndex) => {
-        if (table1_heading) {
-            const cells = table1_heading.querySelectorAll("th");
+        if (dataTableID) {
+            let cells = dataTableHeading.querySelectorAll("th");
+            if (cells.length === 0) {
+                cells = dataTableHeading.querySelectorAll("td");
+            }
             cells.forEach((cell, index) => {
-                const icons = cell.querySelectorAll("i");
-                icons[0].classList.remove("text-gray-200");
-                icons[1].classList.remove("text-gray-200");
+                const icons = cell.querySelectorAll("span");
+                icons[0].style.display = "none";
+                icons[1].style.display = "none";
                 if (index === cellIndex) {
-                    icons[0].classList.add("text-gray-200");
+                    icons[1].style.display = "contents";
                 }
             });
         }
     };
     const rearrangeTable = (dataTableID, cellIndex) => {
-        const tbody = dataTableID.querySelectorAll("tbody")[0];
         if (increasing) {
-            sortTableBodyIncreasing(tbody, cellIndex);
+            sortTableBodyIncreasing(cellIndex);
             changeIncreasingBtnColor(cellIndex);
         } else {
-            sortTableBodyDecreasing(tbody, cellIndex);
+            sortTableBodyDecreasing(cellIndex);
             changeDecreasingBtnColor(cellIndex);
         }
     };
 
     const addUpAndDownIconinThead = () => {
-        const cells = table1_heading.querySelectorAll("th");
-        if (cells) {
+        let cells = dataTableHeading.querySelectorAll("th");
+        if (cells.length === 0) {
+            cells = dataTableHeading.querySelectorAll("td");
+        }
+
+        if (cells.length > 0) {
             cells.forEach((cell, index) => {
                 const iconDiv = document.createElement("div");
-                const upIcon = document.createElement("i");
-                upIcon.classList.add("fa-solid", "fa-up-long", "text-gray-500");
-
-                const downIcon = document.createElement("i");
-                downIcon.classList.add("fa-solid", "fa-down-long", "text-gray-500");
+                iconDiv.classList.add("dt_icon_div");
+                iconDiv.style.display = "flex";
+                const upIcon = document.createElement("span");
+                upIcon.classList.add("dt_upicon");
+                upIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000" height="8px" width="8px" version="1.1" id="Layer_1" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve">
+                <polygon points="245,0 74.3,213.3 202.3,213.3 202.3,512 287.7,512 287.7,213.3 415.7,213.3 " />
+            </svg>`;
+                const downIcon = document.createElement("span");
+                downIcon.classList.add("dt_downicon");
+                downIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000" height="8px" width="8px" version="1.1" id="Layer_1" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve">
+                <polygon points="283.7,298.7 283.7,0 198.3,0 198.3,298.7 70.3,298.7 241,512 411.7,298.7 " />
+            </svg>`;
 
                 iconDiv.appendChild(downIcon);
                 iconDiv.appendChild(upIcon);
 
                 cell.appendChild(iconDiv);
-                cell.classList.add("cursor-pointer");
+                cell.style.cursor = "pointer";
             });
         }
     };
-    const ffDataTable = (tableId, tableHeading, plugins) => {
-        dataTableID = document.getElementById(tableId);
-        table1_heading = document.getElementById(tableHeading);
+    const selectHeader = (id) => {
+        dataTableHeading = document.getElementById(id).querySelectorAll('tr')[0];
+    }
+
+    const enableSearchPlugin = () => {
+        const curr_table = document.getElementById(dataTableID);
+        curr_table.style.marginTop = "32px";
+        // curr_table.classList.add("data-table");
+        curr_table.style.position = "relative";
+        const newSearchBox = document.createElement("div");
+        newSearchBox.classList.add("data-table-search-box");
+        newSearchBox.style.position = "absolute";
+        newSearchBox.style.top = "-28px";
+        newSearchBox.style.right = "0";
+        newSearchBox.innerHTML = "<label>Search: </label><input id='datatableSearchInput'  type='text' style='outline:none; border:1px solid gray; border-radius:4px; padding:4px 8px;'/>";
+        curr_table.appendChild(newSearchBox);
+        // properties
+        const searchInput = document.getElementById('datatableSearchInput')
+        if (searchInput) {
+            searchInput.addEventListener("input", function () {
+                if (searchInput.value.length === 0) {
+                    filterAndSortTableBody(
+                        originalTableBody,
+                        -1,
+                        ""
+                    );
+                } else {
+                    filterAndSortTableBody(
+                        originalTableBody,
+                        -1,
+                        searchInput.value
+                    );
+                }
+            });
+        }
+    }
+
+
+    const enableCopyCellPlugin = () => {
+        const curr_table = document.getElementById(dataTableID);
+        curr_table.style.marginBottom = "32px";
+        // curr_table.classList.add("data-table");
+        curr_table.style.position = "relative";
+        const newSearchBox = document.createElement("div");
+        newSearchBox.classList.add("data-table-copy-cell-box");
+        newSearchBox.style.position = "absolute";
+        newSearchBox.style.bottom = "-28px";
+        newSearchBox.style.right = "0";
+        newSearchBox.innerHTML = "<select style='outline:none; border:1px solid gray; border-radius:2px; padding:4px 8px; margin-right:4px;cursor:pointer;' id='select_copy_type'><option value='col' selected>Copy Col</option></select><input id='select_copy_type_input'  type='number' style='outline:none; border:1px solid gray; border-radius:4px; padding:4px 8px;max-width:60px;'/><button type='button' id='copy_cells_btn' style='margin-left:4px;padding:3px 8px;cursor:pointer;'>Copy</button>";
+        curr_table.appendChild(newSearchBox);
+
+        const copy_cells_btn = document.getElementById('copy_cells_btn');
+        if (copy_cells_btn) {
+            copy_cells_btn.addEventListener('click', async () => {
+                const type_val = document.getElementById('select_copy_type').value;
+                let input_val = parseInt(document.getElementById('select_copy_type_input').value);
+
+
+                if (isNaN(input_val)) {
+                    alert('Enter valid argument.');
+                    return;
+                }
+                const curr_table = document.getElementById(dataTableID);
+                const currentRows = curr_table.querySelectorAll('tr');
+                const totalCells = currentRows[0].cells
+                if (input_val >= totalCells.length || input_val < 0) {
+                    alert('Enter valid argument.');
+                    return;
+                }
+
+                let copyText = '';
+                currentRows.forEach((row, index) => {
+                    let textContent = row.querySelectorAll('td')[input_val]?.textContent;
+                    if (!textContent) {
+                        textContent = row.querySelectorAll('th')[input_val].textContent;
+                    }
+                    copyText += `${textContent}\n`;
+                });
+
+                var textarea = document.createElement("textarea");
+                textarea.value = copyText;
+                document.body.appendChild(textarea);
+                textarea.select();
+                textarea.setSelectionRange(0, 99999);
+                document.execCommand("copy");
+                document.body.removeChild(textarea);
+                console.log('text Copied to clipboard.');
+            });
+        }
+    }
+    const copyDataTableHeadingData = () => {
+
+        let tableCells = dataTableHeading.querySelectorAll("th");
+        if (tableCells.length === 0) {
+            tableCells = dataTableHeading.querySelectorAll("td");
+        }
+        tableCells.forEach((cell) => {
+            initialTableHeadData.push(cell.textContent);
+        });
+    }
+    const DataTableInitialFunction = (tableId, plugins) => {
+        dataTableID = tableId;
+        selectHeader(tableId);
         if (dataTableID) {
-            const tbody = dataTableID.querySelectorAll("tbody")[0];
-            originalTableBody = tbody.cloneNode(true);
-            if (table1_heading) {
-                addUpAndDownIconinThead(table1_heading);
-                table1_heading.addEventListener("click", (event) => {
+            const tbodyRows = document.getElementById(dataTableID).querySelectorAll("tr");
+            tbodyRows.forEach((row, index) => {
+                if (index === 0) {
+                    return;
+                }
+                originalTableBody.push(row.cloneNode(true));
+            });
+
+            if (dataTableHeading) {
+                copyDataTableHeadingData();
+                addUpAndDownIconinThead();
+                dataTableHeading.addEventListener("click", (event) => {
                     let cell = event.target.tagName;
                     cellIndex = -1;
                     if (cell.toLowerCase() === "th" || cell.toLowerCase() === "td") {
@@ -213,39 +349,27 @@ const createDataTable = (
                 });
             } else {
                 console.error("Element with ID not found.");
+                return;
             }
 
-            dataTableID.classList.add("relative", "mt-12");
-            const newSearchBox = document.createElement("div");
-            newSearchBox.classList.add("absolute", "-top-12", "right-0");
-            newSearchBox.innerHTML = "<label>Search: </label><input id='datatableSearchInput'  type='text' class='outline-none border-[1px] border-gray-300 rounded p-1 focus:border-blue-500'/>";
-            if (plugins.searching) {
-                dataTableID.appendChild(newSearchBox);
+            if (plugins?.searching) {
+                //enable searching functionlities
+                enableSearchPlugin();
             }
 
-            //   properties
-            const searchInput = newSearchBox.querySelector("input");
-            searchInput.addEventListener("input", function () {
-                if (searchInput.value.length === 0) {
-                    filterAndSortTableBody(
-                        dataTableID.querySelectorAll("tbody")[0],
-                        -1,
-                        ""
-                    );
-                } else {
-                    filterAndSortTableBody(
-                        dataTableID.querySelectorAll("tbody")[0],
-                        -1,
-                        searchInput.value
-                    );
-                }
-            });
+
+            if (plugins?.copyCellText) {
+                //enable copycell functionlities
+                enableCopyCellPlugin();
+            }
+
+            console.log(plugins);
         } else {
             console.log("Table doesn't exist.");
         }
     };
     const initializeDataTable = () => {
-        ffDataTable(tableId, tableHeadingId, plugins);
+        DataTableInitialFunction(tableId, plugins);
     };
     return {
         initializeDataTable,
