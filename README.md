@@ -30,7 +30,10 @@ npm install easy-datatable
     dataTable.initializeDataTable();
 
 # Sorting with Data-Order
+<<<<<<< HEAD
 
+=======
+>>>>>>> f1aec26d9e969d0b2051a8e47fb6cb0a8c4c0f53
 define data-order as an attribute in td to use another value insted of textContent for sorting.
 
 # Plugins
