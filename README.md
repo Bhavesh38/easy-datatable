@@ -77,7 +77,3 @@ define data-order as an attribute in td to use another value insted of textConte
     dataTable.initializeDataTable();
 
 ![Example](https://i.ibb.co/F7DvsTw/Screenshot-2024-02-06-000420.png)
-
-```
-
-```
