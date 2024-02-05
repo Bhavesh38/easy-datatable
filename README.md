@@ -20,6 +20,7 @@
 
 Install the library via npm:
 
+```bash
 npm install easy-datatable
 
 ## Usage
@@ -30,10 +31,7 @@ npm install easy-datatable
     dataTable.initializeDataTable();
 
 # Sorting with Data-Order
-<<<<<<< HEAD
 
-=======
->>>>>>> f1aec26d9e969d0b2051a8e47fb6cb0a8c4c0f53
 define data-order as an attribute in td to use another value insted of textContent for sorting.
 
 # Plugins
@@ -82,3 +80,4 @@ define data-order as an attribute in td to use another value insted of textConte
     dataTable.initializeDataTable();
 
 ![Example](https://i.ibb.co/F7DvsTw/Screenshot-2024-02-06-000420.png)
+```
