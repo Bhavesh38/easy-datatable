@@ -30,8 +30,7 @@ npm install easy-datatable
     dataTable.initializeDataTable();
 
 # Sorting with Data-Order
-
-    define data-order as an attribute in td to use another value insted of textContent for sorting.
+define data-order as an attribute in td to use another value insted of textContent for sorting.
 
 # Plugins
 
@@ -78,7 +77,7 @@ npm install easy-datatable
     const dataTable = createDataTable('table', { searching: true, copyCellText: true });
     dataTable.initializeDataTable();
 
-    ![alt text](https://i.ibb.co/F7DvsTw/Screenshot-2024-02-06-000420.png)
+![Example](https://i.ibb.co/F7DvsTw/Screenshot-2024-02-06-000420.png)
 
 Features
 Sorting: Click on any table header to sort the table in ascending or descending order based on the column values.
