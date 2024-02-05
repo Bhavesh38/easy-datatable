@@ -376,4 +376,4 @@ const createDataTable = (
     };
 };
 
-module.exports = createDataTable;
+export default createDataTable;
